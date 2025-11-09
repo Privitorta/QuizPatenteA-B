@@ -11,28 +11,28 @@ tailwind.config = {
 
 // Funzione per caricare le domande dal file JSON
 function loadQuestions() {
-        // Mostra messaggio di caricamento
-        if (typeof statusMessage !== 'undefined' && statusMessage) {
-                statusMessage.textContent = 'Caricamento domande in corso...';
-        }
+    // Mostra messaggio di caricamento
+    if (typeof statusMessage !== 'undefined' && statusMessage) {
+            statusMessage.textContent = 'Caricamento domande in corso...';
+    }
 
     return fetch('domande.json')
-                .then(response => {
-                        if (!response.ok) throw new Error(response.status + ' ' + response.statusText);
-                        return response.json();
-                })
-                .then(data => {
-                        allQuestions = data;
-                        if (typeof statusMessage !== 'undefined' && statusMessage) {
-                                statusMessage.textContent = 'Ci sono ' + allQuestions.length + ' quiz disponibili. Scrivi almeno 2 caratteri per iniziare la ricerca.';
-                        }
-                })
-                .catch(err => {
-                        console.error('Errore caricamento domande:', err);
-                        if (typeof statusMessage !== 'undefined' && statusMessage) {
-                                statusMessage.textContent = 'Errore caricamento domande. Dettagli: ' + err.message;
-                        }
-                });
+        .then(response => {
+                if (!response.ok) throw new Error(response.status + ' ' + response.statusText);
+                return response.json();
+        })
+        .then(data => {
+                allQuestions = data;
+                if (typeof statusMessage !== 'undefined' && statusMessage) {
+                        statusMessage.textContent = 'Ci sono ' + allQuestions.length + ' quiz disponibili. Scrivi almeno 2 caratteri per iniziare la ricerca.';
+                }
+        })
+        .catch(err => {
+                console.error('Errore caricamento domande:', err);
+                if (typeof statusMessage !== 'undefined' && statusMessage) {
+                        statusMessage.textContent = 'Errore caricamento domande. Dettagli: ' + err.message;
+                }
+        });
 }
 // Variabili globali per gli elementi e lo stato
 let searchInput, resultsContainer, statusMessage, sunIcon, moonIcon, htmlEl;
@@ -95,9 +95,22 @@ function renderResults(searchTerm) {
     }
 
     // Filtra le domande
-    const filteredQuestions = allQuestions.filter(q =>
+    let filteredQuestions = allQuestions.filter(q =>
         (q.domanda || '').toLowerCase().includes(searchTerm)
     );
+
+    // Ordina i risultati per `numero` (preferibilmente numerico, altrimenti lessicografico)
+    filteredQuestions.sort((a, b) => {
+        const na = parseInt(a && a.numero, 10);
+        const nb = parseInt(b && b.numero, 10);
+        const aNum = Number.isFinite(na) ? na : null;
+        const bNum = Number.isFinite(nb) ? nb : null;
+        if (aNum != null && bNum != null) return aNum - bNum;
+        if (aNum != null) return -1; // numerico prima di non-numerico
+        if (bNum != null) return 1;
+        // fallback lessicografico (locale-aware, numeric option for mixed strings)
+        return (a && a.numero || '').localeCompare((b && b.numero) || '', undefined, {numeric: true});
+    });
 
     if (filteredQuestions.length === 0) {
             resultsContainer.innerHTML = `
@@ -163,16 +176,12 @@ window.onload = function() {
 
     // Controlla il tema salvato in localStorage o le preferenze di sistema
     const savedTheme = localStorage.getItem('theme');
-    
     if (savedTheme === 'dark') {
         isDarkMode = true;
     } else if (savedTheme === 'light') {
         isDarkMode = false;
     } else {
-        // Se non c'è nulla in localStorage, controlla le preferenze di sistema
         isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
     }
-
-    // Applica il tema al caricamento
     updateTheme(isDarkMode);
 };
