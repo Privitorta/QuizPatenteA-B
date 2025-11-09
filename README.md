@@ -22,7 +22,7 @@ Il file è un array di domande di questo tipo:
 	{
 		"numero": "21812",
 		"domanda": "Testo della domanda...",
-		"risposta": "VERO"  /* o "FALSO" */
+		"risposta": "VERO"
 	}
 ]
 ```
