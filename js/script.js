@@ -16,7 +16,7 @@ function loadQuestions() {
                 statusMessage.textContent = 'Caricamento domande in corso...';
         }
 
-        fetch('domande.json')
+    return fetch('domande.json')
                 .then(response => {
                         if (!response.ok) throw new Error(response.status + ' ' + response.statusText);
                         return response.json();
@@ -61,12 +61,31 @@ function toggleTheme() {
     updateTheme(isDarkMode);
 }
 
+// Sanitizzazione
+
+function sanitizeSearchInput(value) {
+    if (value == null) return '';
+    return String(value).trim().toLowerCase().replace(/[\u0000-\u001F\u007F<>]/g, '');
+}
+function escapeHtml(str) {
+    if (str == null) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 // Loading e ricerca delle domande
 
 // Funzione per mostrare i risultati
 function renderResults(searchTerm) {
     // Pulisci i risultati precedenti
-    resultsContainer.innerHTML = ''; 
+    resultsContainer.innerHTML = '';
+
+    // Assicura che il termine sia sanitizzato
+    searchTerm = sanitizeSearchInput(searchTerm);
 
     if (searchTerm.length < 2) {
         // Non cercare se il termine è troppo corto
@@ -76,17 +95,16 @@ function renderResults(searchTerm) {
     }
 
     // Filtra le domande
-    const filteredQuestions = allQuestions.filter(q => 
-        q.domanda.toLowerCase().includes(searchTerm)
+    const filteredQuestions = allQuestions.filter(q =>
+        (q.domanda || '').toLowerCase().includes(searchTerm)
     );
 
     if (filteredQuestions.length === 0) {
-        // Nessun risultato
-        resultsContainer.innerHTML = `
-            <p class="text-center text-gray-500 dark:text-gray-400">
-                Nessuna domanda trovata per "${searchTerm}".
-            </p>
-        `;
+            resultsContainer.innerHTML = `
+                <p class="text-center text-gray-500 dark:text-gray-400">
+                    Nessuna domanda trovata per "${escapeHtml(searchTerm)}".
+                </p>
+            `;
     } else {
         // Mostra i risultati
         filteredQuestions.forEach(q => {
@@ -100,11 +118,11 @@ function renderResults(searchTerm) {
             card.className = 'bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700';
             card.innerHTML = `
                 <p class="mb-3 text-gray-800 dark:text-gray-200">
-                    <span class="font-medium text-gray-500 dark:text-gray-400 text-sm">[${q.numero}]</span>
-                    ${q.domanda}
+                    <span class="font-medium text-gray-500 dark:text-gray-400 text-sm">[${escapeHtml(q.numero)}]</span>
+                    ${escapeHtml(q.domanda)}
                 </p>
                 <p class="font-bold text-lg ${answerClass}">
-                    ${q.risposta}
+                    ${escapeHtml(q.risposta)}
                 </p>
             `;
             resultsContainer.appendChild(card);
@@ -112,9 +130,9 @@ function renderResults(searchTerm) {
     }
 }
 
-// Gestore per la ricerca (chiamato da oninput)
+// Gestore per la ricerca
 function handleSearch(value) {
-    const searchTerm = value.trim().toLowerCase();
+    const searchTerm = sanitizeSearchInput(value);
     renderResults(searchTerm);
 }
 
@@ -130,7 +148,18 @@ window.onload = function() {
     htmlEl = document.documentElement;
 
     // Carica le domande dal file JSON
-    loadQuestions();
+    loadQuestions().then(() => {
+        try {
+            const initial = searchInput && searchInput.value ? searchInput.value.trim().toLowerCase() : '';
+            if (initial.length >= 2) {
+                renderResults(initial);
+            }
+        } catch (e) {
+            console.error('Errore ripristino ricerca:', e);
+        }
+    }).catch(() => {
+        // Il messaggio di errore è già mostrato nello statusMessage ;)
+    });
 
     // Controlla il tema salvato in localStorage o le preferenze di sistema
     const savedTheme = localStorage.getItem('theme');
