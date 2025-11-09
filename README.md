@@ -30,7 +30,7 @@ Il file è un array di domande di questo tipo:
 Così com'è, il progetto assume che `domande.json` risieda nella stessa cartella di `index.html`.
 
 ## Accedere alla WebApp
-Si può facilmente accedere alla webapp tramite il sito GitHub pages che trovi sulla pagina della repo oppure qui: [privitorta.github.io/QuizPatenteA-B/](privitorta.github.io/QuizPatenteA-B/).
+Si può facilmente accedere alla webapp tramite il sito GitHub pages che trovi sulla pagina della repo oppure qui: [https://privitorta.github.io/QuizPatenteA-B/](https://privitorta.github.io/QuizPatenteA-B)/.
 
 ### Sviluppo locale
 
