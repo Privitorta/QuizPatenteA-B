@@ -9,6 +9,14 @@ tailwind.config = {
     },
 }
 
+// Funzione per pulire la ricerca
+function clearSearch() {
+    searchInput.value = '';
+    clearButton.style.display = 'none';
+    handleSearch('');
+    searchInput.focus();
+}
+
 // Funzione per caricare le domande dal file JSON
 function loadQuestions() {
     // Mostra messaggio di caricamento
@@ -35,7 +43,7 @@ function loadQuestions() {
         });
 }
 // Variabili globali per gli elementi e lo stato
-let searchInput, resultsContainer, statusMessage, sunIcon, moonIcon, htmlEl;
+let searchInput, resultsContainer, statusMessage, sunIcon, moonIcon, htmlEl, clearButton;
 let allQuestions = [];
 let isDarkMode = false;
 
@@ -165,6 +173,11 @@ function renderResults(searchTerm) {
 function handleSearch(value) {
     const searchTerm = sanitizeSearchInput(value);
     renderResults(searchTerm);
+    
+    // Mostra o nascondi il pulsante clear
+    if (clearButton) {
+        clearButton.style.display = searchTerm.length > 0 ? 'block' : 'none';
+    }
 }
 
 // Inizializzazione
@@ -177,6 +190,7 @@ window.onload = function() {
     sunIcon = document.getElementById('sun-icon');
     moonIcon = document.getElementById('moon-icon');
     htmlEl = document.documentElement;
+    clearButton = document.getElementById('clear-button');
 
     // Carica le domande dal file JSON
     loadQuestions().then(() => {
