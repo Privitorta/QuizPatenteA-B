@@ -1,6 +1,7 @@
 # Quiz Patente A/B
 
 Progetto semplice per cercare domande di quiz patente (A/B) lato client, le domande sono aggiornate a quelle del 2025 e sono 7106 quiz V/F totali.
+In collaborazione con [@andrealungh1](https://github.com/andrealungh1) (di grande aiuto per il file `domande.json`!)
 
 - Carica l'elenco delle domande da `domande.json` tramite `fetch`
 - Ricerca testuale (minimo 2 caratteri) su tutte le domande presenti nel file
