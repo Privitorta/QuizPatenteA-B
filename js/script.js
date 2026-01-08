@@ -67,6 +67,20 @@ function sanitizeSearchInput(value) {
     if (value == null) return '';
     return String(value).trim().toLowerCase().replace(/[\u0000-\u001F\u007F<>]/g, '');
 }
+
+// Normalizza il testo per la ricerca (rimuove spazi multipli, punteggiatura, simboli)
+function normalizeForSearch(text) {
+    if (text == null) return '';
+    return String(text)
+        .toLowerCase() // Case-insensitive
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Rimuove accenti
+        .replace(/[''’`´]/g, '') // Rimuove apostrofi e apici vari
+        .replace(/["«»“”""]/g, '') // Rimuove virgolette varie
+        .replace(/[.,;:!?¿¡]/g, '') // Rimuove punteggiatura
+        .replace(/\s+/g, ' ') // Sostituisce spazi multipli con uno singolo
+        .trim();
+}
+
 function escapeHtml(str) {
     if (str == null) return '';
     return String(str)
@@ -94,10 +108,14 @@ function renderResults(searchTerm) {
         return;
     }
 
-    // Filtra le domande
-    let filteredQuestions = allQuestions.filter(q =>
-        (q.domanda || '').toLowerCase().includes(searchTerm)
-    );
+    // Normalizza il termine di ricerca
+    const normalizedSearchTerm = normalizeForSearch(searchTerm);
+
+    // Filtra le domande usando la versione normalizzata
+    let filteredQuestions = allQuestions.filter(q => {
+        const normalizedQuestion = normalizeForSearch(q.domanda || '');
+        return normalizedQuestion.includes(normalizedSearchTerm);
+    });
 
     // Ordina i risultati per `numero` (preferibilmente numerico, altrimenti lessicografico)
     filteredQuestions.sort((a, b) => {
