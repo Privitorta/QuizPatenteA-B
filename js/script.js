@@ -76,7 +76,7 @@ function sanitizeSearchInput(value) {
     return String(value).trim().toLowerCase().replace(/[\u0000-\u001F\u007F<>]/g, '');
 }
 
-// Normalizza il testo per la ricerca (rimuove spazi multipli, punteggiatura, simboli)
+// Normalizza il testo per la ricerca (rimuove spazi multipli, punteggiatura, simboli, articoli)
 function normalizeForSearch(text) {
     if (text == null) return '';
     return String(text)
@@ -85,8 +85,15 @@ function normalizeForSearch(text) {
         .replace(/[''’`´]/g, '') // Rimuove apostrofi e apici vari
         .replace(/["«»“”""]/g, '') // Rimuove virgolette varie
         .replace(/[.,;:!?¿¡]/g, '') // Rimuove punteggiatura
+        .replace(/\s*([()])\s*/g, '$1') // Rimuove spazi intorno alle parentesi
         .replace(/\s+/g, ' ') // Sostituisce spazi multipli con uno singolo
-        .trim();
+        .trim()
+        .split(' ')
+        .filter(word => {
+            const articoli = ['il', 'lo', 'la', 'i', 'gli', 'le', 'un', 'uno', 'una', 'l'];
+            return !articoli.includes(word);
+        })
+        .join(' ');
 }
 
 function escapeHtml(str) {
