@@ -90,7 +90,7 @@ function normalizeForSearch(text) {
         .trim()
         .split(' ')
         .filter(word => {
-            const articoli = ['il', 'lo', 'la', 'i', 'gli', 'le', 'un', 'uno', 'una', 'l'];
+            const articoli = ['il', 'lo', 'la', 'i', 'gli', 'le', 'un', 'uno', 'una', 'l', "della", "delle", "del,", "dei", "degli", "dell'", "d'", "al", "allo", "alla", "ai", "agli", "alle", "dal", "dallo", "dalla", "dai", "dagli", "dalle"];
             return !articoli.includes(word);
         })
         .join(' ');
